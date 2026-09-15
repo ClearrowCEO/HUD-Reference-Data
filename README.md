@@ -38,3 +38,20 @@ job consumes it and which vintage it is, without opening the file:
    at the top level.
 4. Update `hud_ingest_sources.override_url` (table in the Broker's Portfolio Supabase project) to
    the new file's raw GitHub URL, and re-run the `hud-crosswalk-ingest` function.
+
+## Correction (2026-09-15): the original 2026-06 file was the wrong direction
+
+The file originally ingested for the 2026-06 period was HUD's **COUNTY-to-ZIP** crosswalk (each
+row answers "what share of *this county* falls in this ZIP"), not the **ZIP-to-COUNTY** crosswalk
+`resolve_zip_counties` needs (each row answering "what share of *this ZIP* falls in this county").
+Both files have the same column names and look identical without checking the actual ratios —
+confirmed by summing `TOT_RATIO` grouped by ZIP vs. by COUNTY: the wrong file summed to ~1.0 per
+county (39,484 ZIPs, 0.08 average per-ZIP sum); the corrected file sums to exactly 1.0 per ZIP
+(same 54,570 rows, 39,484 ZIPs, but a 12.2 average per-county sum instead). See
+[BrokersPortfolio's docs/DATA_MODEL.md](https://github.com/ClearrowCEO/BrokersPortfolio/blob/main/docs/DATA_MODEL.md)
+for the full write-up of the bug this caused.
+
+The original wrong-direction file is kept at
+`raw/hud-zip-county-crosswalk_2026-06_WRONG-DIRECTION-county-to-zip.xlsx` for audit purposes —
+do not use it. `raw/hud-zip-county-crosswalk_2026-06.xlsx` and the top-level
+`hud-zip-county-crosswalk_2026-06.csv` now both reflect the corrected file.
